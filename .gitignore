@@ -1,1 +1,14 @@
+node_modules
+dist
+.wrangler
+.dev.vars
+.env
+.vscode
 wrangler.toml
+
+# Change them to your taste:
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
