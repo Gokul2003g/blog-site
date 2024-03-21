@@ -19,7 +19,9 @@ app.put("/api/v1/blog", (c) => {
 });
 
 app.get("/api/v1/blog/:id", (c) => {
-  return c.text("Get blog by id");
+  const id = c.req.param("id");
+  console.log(id);
+  return c.text("get blog route");
 });
 
 app.get("/api/v1/blog/bulk", (c) => {
