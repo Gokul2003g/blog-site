@@ -22,7 +22,9 @@ blogRouter.get("/bulk", async (c) => {
   try {
     const posts = await prisma.post.findMany();
 
-    return c.json(posts);
+    const publishedPosts = posts.filter((post) => post.published);
+
+    return c.json(publishedPosts);
   } catch (error) {
     return c.json({ error });
   }
@@ -89,7 +91,7 @@ blogRouter.put("/", async (c) => {
     return c.json({ error: data.error });
   }
 
-  const { title, content, id } = data.data;
+  const { title, content, id, published } = data.data;
 
   try {
     const post = await prisma.post.update({
@@ -100,6 +102,7 @@ blogRouter.put("/", async (c) => {
       data: {
         title,
         content,
+        published,
       },
     });
 

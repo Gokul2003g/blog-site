@@ -20,6 +20,7 @@ export const updatePostSchema = z.object({
   id: z.string(),
   title: z.string().min(1),
   content: z.string().min(1),
+  published: z.boolean(),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;
