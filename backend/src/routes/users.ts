@@ -11,6 +11,8 @@ export const userRouter = new Hono<{
   };
 }>();
 
+// TODO: add hashing to the password before sending
+
 userRouter.post("/signup", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -56,7 +58,6 @@ userRouter.post("/signin", async (c) => {
   }
 
   const { email, password } = data.data;
-
   try {
     const user = await prisma.user.findUniqueOrThrow({
       where: {
