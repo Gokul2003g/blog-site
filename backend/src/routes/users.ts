@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { signupSchema, signinSchema } from "../../../zod/src/index";
@@ -14,6 +14,7 @@ export const userRouter = new Hono<{
 userRouter.post("/signup", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
+    log: ["query", "info", "warn", "error"], // Enable desired log levels
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
@@ -26,25 +27,19 @@ userRouter.post("/signup", async (c) => {
   const { name, email, password } = data.data;
 
   try {
-    const findUser = await prisma.user.findUnique({
-      where: {
-        email,
+    const user = await prisma.user.create({
+      data: {
+        name: name,
+        email: email,
+        password: password,
       },
     });
 
-    if (!findUser) {
-      const user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          password,
-        },
-      });
-      const token = sign({ userId: user.id }, c.env.JWT_SECRET);
-      return c.json({ token });
-    }
+    const token = await sign({ userId: user.id }, c.env.JWT_SECRET);
+
+    return c.json({ token });
   } catch (error) {
-    return c.json({ error: "Error creating user. Try again later." });
+    return c.json({ error });
   }
 });
 
@@ -52,8 +47,6 @@ userRouter.post("/signin", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-
-  console.log("HI there");
 
   const body = await c.req.json();
   const data = signinSchema.safeParse(body);
@@ -65,7 +58,7 @@ userRouter.post("/signin", async (c) => {
   const { email, password } = data.data;
 
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findUniqueOrThrow({
       where: {
         email,
         password,
