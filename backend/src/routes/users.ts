@@ -1,3 +1,5 @@
+import { PrismaClient } from "@prisma/client";
+import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 
 export const userRouter = new Hono<{
@@ -7,7 +9,13 @@ export const userRouter = new Hono<{
   };
 }>();
 
-userRouter.post("/signup", (c) => {
+userRouter.post("/signup", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const body = await c.req.json();
+
   return c.text("Signup Route");
 });
 
