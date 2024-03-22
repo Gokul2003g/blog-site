@@ -109,7 +109,22 @@ blogRouter.put("/", async (c) => {
   }
 });
 
-blogRouter.get("/:id", (c) => {
+blogRouter.get("/:id", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
   const id = c.req.param("id");
-  return c.text("get blog route");
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return c.json(post);
+  } catch (error) {
+    return c.json({ error });
+  }
 });
